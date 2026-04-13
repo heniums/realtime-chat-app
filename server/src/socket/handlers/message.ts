@@ -5,8 +5,7 @@ import {
   getRoom,
   addMessage,
   setTyping,
-  getTypingUsers,
-  getUsersInRoom,
+  getTypingUsernames,
 } from "../../store";
 
 const MAX_MESSAGE_LENGTH = 1000;
@@ -66,13 +65,12 @@ export function registerMessageHandlers(socket: Socket, io: Server): void {
     if (!user || !user.rooms.includes(roomId)) return;
 
     setTyping(roomId, socket.id, true);
-    const typingUsernames = getTypingUsers(roomId)
-      .map((id) => getUsersInRoom(roomId).find((u) => u.id === id)?.username)
-      .filter((name): name is string => name !== undefined);
-
     socket
       .to(roomId)
-      .emit(EVENTS.TYPING_UPDATE, { roomId, users: typingUsernames });
+      .emit(EVENTS.TYPING_UPDATE, {
+        roomId,
+        users: getTypingUsernames(roomId),
+      });
   });
 
   // ── typing:stop ────────────────────────────────────────────────────────────
@@ -81,12 +79,11 @@ export function registerMessageHandlers(socket: Socket, io: Server): void {
     if (!user) return;
 
     setTyping(roomId, socket.id, false);
-    const typingUsernames = getTypingUsers(roomId)
-      .map((id) => getUsersInRoom(roomId).find((u) => u.id === id)?.username)
-      .filter((name): name is string => name !== undefined);
-
     socket
       .to(roomId)
-      .emit(EVENTS.TYPING_UPDATE, { roomId, users: typingUsernames });
+      .emit(EVENTS.TYPING_UPDATE, {
+        roomId,
+        users: getTypingUsernames(roomId),
+      });
   });
 }

@@ -126,3 +126,9 @@ export function setTyping(
 export function getTypingUsers(roomId: string): string[] {
   return Array.from(typing.get(roomId) ?? []);
 }
+
+export function getTypingUsernames(roomId: string): string[] {
+  return getTypingUsers(roomId)
+    .map((id) => getUsersInRoom(roomId).find((u) => u.id === id)?.username)
+    .filter((name): name is string => name !== undefined);
+}
