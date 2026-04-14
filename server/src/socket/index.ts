@@ -3,6 +3,7 @@ import { Server as HttpServer } from "http";
 import { registerAuthHandlers } from "./handlers/auth";
 import { registerRoomHandlers } from "./handlers/room";
 import { registerMessageHandlers } from "./handlers/message";
+import { authMiddleware } from "../middleware/auth";
 import {
   removeUser,
   getUser,
@@ -18,6 +19,9 @@ export function initSocket(httpServer: HttpServer): Server {
       methods: ["GET", "POST"],
     },
   });
+
+  // Verify JWT on every connection (first-time users without tokens pass through).
+  io.use(authMiddleware);
 
   io.on(EVENTS.CONNECTION, (socket) => {
     console.log(`[socket] connected: ${socket.id}`);
