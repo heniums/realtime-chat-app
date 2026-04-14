@@ -44,7 +44,7 @@ export function useRoom(roomId: string | undefined) {
       setTimeout(() => setRoomError(null), 5000);
     }
     function onReconnected() {
-      // 'connect' fires on every (re)connection. Since the socket is already
+      // EVENTS.CONNECT fires on every (re)connection. Since the socket is already
       // connected when this effect mounts, this only triggers on reconnections.
       // Re-join so we get fresh room:users + message:history.
       setJoined(false);
@@ -53,12 +53,12 @@ export function useRoom(roomId: string | undefined) {
 
     socket.on(EVENTS.ROOM_USERS, onRoomUsers);
     socket.on(EVENTS.ROOM_ERROR, onRoomError);
-    socket.on('connect', onReconnected);
+    socket.on(EVENTS.CONNECT, onReconnected);
 
     return () => {
       socket.off(EVENTS.ROOM_USERS, onRoomUsers);
       socket.off(EVENTS.ROOM_ERROR, onRoomError);
-      socket.off('connect', onReconnected);
+      socket.off(EVENTS.CONNECT, onReconnected);
       socket.emit(EVENTS.ROOM_LEAVE, { roomId });
     };
   }, [roomId]);

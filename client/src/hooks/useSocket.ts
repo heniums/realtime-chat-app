@@ -22,12 +22,12 @@ export function useSocket() {
       setConnected(false);
     }
 
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
+    socket.on(EVENTS.CONNECT, onConnect);
+    socket.on(EVENTS.DISCONNECT, onDisconnect);
 
     return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
+      socket.off(EVENTS.CONNECT, onConnect);
+      socket.off(EVENTS.DISCONNECT, onDisconnect);
       socket.disconnect();
     };
   }, [token]);
@@ -45,12 +45,12 @@ export function useConnected() {
     function onConnect() { setConnected(true); }
     function onDisconnect() { setConnected(false); }
 
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
+    socket.on(EVENTS.CONNECT, onConnect);
+    socket.on(EVENTS.DISCONNECT, onDisconnect);
 
     return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
+      socket.off(EVENTS.CONNECT, onConnect);
+      socket.off(EVENTS.DISCONNECT, onDisconnect);
     };
   }, []);
 
