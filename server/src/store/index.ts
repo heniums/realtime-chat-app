@@ -7,6 +7,11 @@ const rooms = new Map<string, Room>(); // roomId → Room
 const messages = new Map<string, Message[]>(); // roomId → Message[]
 const typing = new Map<string, Set<string>>(); // roomId → Set<userId>
 
+// Grace period before deleting an empty room (ms).
+// Prevents StrictMode double-invoke and brief reconnects from destroying rooms.
+const ROOM_DELETE_GRACE_MS = 5_000;
+const roomDeletionTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
 const MAX_HISTORY = 50;
 
 // ─── User Operations ──────────────────────────────────────────────────────────
@@ -64,6 +69,13 @@ export function addUserToRoom(roomId: string, userId: string): void {
   const user = users.get(userId);
   if (!room || !user) return;
 
+  // Cancel any pending deletion timer — the room is active again.
+  const timer = roomDeletionTimers.get(roomId);
+  if (timer) {
+    clearTimeout(timer);
+    roomDeletionTimers.delete(roomId);
+  }
+
   if (!room.userIds.includes(userId)) room.userIds.push(userId);
   if (!user.rooms.includes(roomId)) user.rooms.push(roomId);
 }
@@ -73,9 +85,22 @@ export function removeUserFromRoom(roomId: string, userId: string): void {
   if (room) {
     room.userIds = room.userIds.filter((id) => id !== userId);
     if (room.userIds.length === 0) {
-      rooms.delete(roomId);
-      messages.delete(roomId);
-      typing.delete(roomId);
+      // Schedule deletion after the grace period instead of deleting immediately.
+      // This prevents StrictMode's mount→unmount→remount cycle from destroying
+      // a room that the client is about to rejoin.
+      if (!roomDeletionTimers.has(roomId)) {
+        const timer = setTimeout(() => {
+          // Re-check: another user may have joined during the grace period.
+          const r = rooms.get(roomId);
+          if (r && r.userIds.length === 0) {
+            rooms.delete(roomId);
+            messages.delete(roomId);
+            typing.delete(roomId);
+          }
+          roomDeletionTimers.delete(roomId);
+        }, ROOM_DELETE_GRACE_MS);
+        roomDeletionTimers.set(roomId, timer);
+      }
     }
   }
 
