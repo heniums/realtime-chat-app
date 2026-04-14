@@ -15,36 +15,55 @@ interface RoomInfo {
 
 // Handles joining/leaving a specific room and tracks the online users list.
 // Server sends room:users whenever the user list changes.
+// Re-joins automatically on socket reconnection.
 export function useRoom(roomId: string | undefined) {
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [joined, setJoined] = useState(false);
+  const [roomError, setRoomError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!roomId) return;
+
+    // Reset state when roomId changes — this is intentional synchronization
+    // with the external socket system, not a cascading render issue.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setJoined(false);
+    setRoomError(null);
+
     // Join the room — server will emit room:users + message:history in response.
     socket.emit(EVENTS.ROOM_JOIN, { roomId });
-    console.log('joining room', roomId);
 
     function onRoomUsers({ roomId: rid, users }: { roomId: string; users: RoomUser[] }) {
       if (rid === roomId) {
         setOnlineUsers(users.map((u) => u.username));
+        setJoined(true);
       }
     }
     function onRoomError({ message }: { message: string }) {
-      console.error('[room error]', message);
+      setRoomError(message);
+      setTimeout(() => setRoomError(null), 5000);
+    }
+    function onReconnected() {
+      // EVENTS.CONNECT fires on every (re)connection. Since the socket is already
+      // connected when this effect mounts, this only triggers on reconnections.
+      // Re-join so we get fresh room:users + message:history.
+      setJoined(false);
+      socket.emit(EVENTS.ROOM_JOIN, { roomId });
     }
 
     socket.on(EVENTS.ROOM_USERS, onRoomUsers);
     socket.on(EVENTS.ROOM_ERROR, onRoomError);
+    socket.on(EVENTS.CONNECT, onReconnected);
 
     return () => {
       socket.off(EVENTS.ROOM_USERS, onRoomUsers);
       socket.off(EVENTS.ROOM_ERROR, onRoomError);
-      console.log('leaving room', roomId);
+      socket.off(EVENTS.CONNECT, onReconnected);
       socket.emit(EVENTS.ROOM_LEAVE, { roomId });
     };
   }, [roomId]);
 
-  return { onlineUsers };
+  return { onlineUsers, joined, roomError };
 }
 
 // Fetches the list of all rooms.

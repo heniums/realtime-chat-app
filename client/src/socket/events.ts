@@ -25,6 +25,10 @@ export const EVENTS = {
   MESSAGE_HISTORY: 'message:history',
   MESSAGE_ERROR: 'message:error',
   TYPING_UPDATE: 'typing:update',
+
+  // Socket.IO built-in events
+  CONNECT: 'connect',
+  DISCONNECT: 'disconnect',
 } as const;
 
 export type EventValue = (typeof EVENTS)[keyof typeof EVENTS];

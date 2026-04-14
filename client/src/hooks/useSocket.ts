@@ -15,20 +15,46 @@ export function useSocket() {
     socket.auth = { token };
     socket.connect();
 
-    function onConnect() { setConnected(true); }
-    function onDisconnect() { setConnected(false); }
+    function onConnect() {
+      setConnected(true);
+    }
+    function onDisconnect() {
+      setConnected(false);
+    }
 
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
+    socket.on(EVENTS.CONNECT, onConnect);
+    socket.on(EVENTS.DISCONNECT, onDisconnect);
 
     return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
+      socket.off(EVENTS.CONNECT, onConnect);
+      socket.off(EVENTS.DISCONNECT, onDisconnect);
       socket.disconnect();
     };
   }, [token]);
 
   return { connected };
+}
+
+// Read-only hook for socket connection status.
+// Use this in pages/components that need to show connection state
+// without triggering connect/disconnect side effects.
+export function useConnected() {
+  const [connected, setConnected] = useState(socket.connected);
+
+  useEffect(() => {
+    function onConnect() { setConnected(true); }
+    function onDisconnect() { setConnected(false); }
+
+    socket.on(EVENTS.CONNECT, onConnect);
+    socket.on(EVENTS.DISCONNECT, onDisconnect);
+
+    return () => {
+      socket.off(EVENTS.CONNECT, onConnect);
+      socket.off(EVENTS.DISCONNECT, onDisconnect);
+    };
+  }, []);
+
+  return connected;
 }
 
 // Handles auth:login — listens for auth:token (success) or auth:error (fail).
