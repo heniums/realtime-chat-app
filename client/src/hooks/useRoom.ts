@@ -23,6 +23,10 @@ export function useRoom(roomId: string | undefined) {
 
   useEffect(() => {
     if (!roomId) return;
+
+    // Reset state when roomId changes — this is intentional synchronization
+    // with the external socket system, not a cascading render issue.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setJoined(false);
     setRoomError(null);
 
