@@ -25,9 +25,6 @@ export const EVENTS = {
   MESSAGE_HISTORY: 'message:history',
   MESSAGE_ERROR: 'message:error',
   TYPING_UPDATE: 'typing:update',
-
-  // Client-only (internal coordination between hooks)
-  APP_RECONNECTED: '_app:reconnected',
 } as const;
 
 export type EventValue = (typeof EVENTS)[keyof typeof EVENTS];
