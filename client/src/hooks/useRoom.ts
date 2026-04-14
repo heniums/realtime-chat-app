@@ -51,12 +51,12 @@ export function useRoom(roomId: string | undefined) {
 
     socket.on(EVENTS.ROOM_USERS, onRoomUsers);
     socket.on(EVENTS.ROOM_ERROR, onRoomError);
-    socket.on('_app:reconnected', onReconnected);
+    socket.on(EVENTS.APP_RECONNECTED, onReconnected);
 
     return () => {
       socket.off(EVENTS.ROOM_USERS, onRoomUsers);
       socket.off(EVENTS.ROOM_ERROR, onRoomError);
-      socket.off('_app:reconnected', onReconnected);
+      socket.off(EVENTS.APP_RECONNECTED, onReconnected);
       socket.emit(EVENTS.ROOM_LEAVE, { roomId });
     };
   }, [roomId]);

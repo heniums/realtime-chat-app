@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 // Manages socket connection lifecycle tied to auth state.
 // Connects when a token is present, disconnects on logout.
-// Emits a custom '_app:reconnected' event so hooks can react to reconnections.
+// Emits EVENTS.APP_RECONNECTED so hooks can react to reconnections.
 export function useSocket() {
   const { token } = useAuth();
   const [connected, setConnected] = useState(false);
@@ -22,7 +22,7 @@ export function useSocket() {
       setConnected(true);
       if (wasConnected) {
         // This is a REconnection, not the first connection.
-        socket.emit('_app:reconnected');
+        socket.emit(EVENTS.APP_RECONNECTED);
       }
       wasConnected = true;
     }
