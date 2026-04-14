@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
+const STORAGE_KEY = 'chat_auth';
+
 interface AuthState {
   token: string | null;
   username: string | null;
@@ -12,14 +14,29 @@ interface AuthContextValue extends AuthState {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+function loadAuth(): AuthState {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return { token: null, username: null };
+    const parsed = JSON.parse(raw);
+    if (parsed.token && parsed.username) return parsed;
+  } catch {
+    /* corrupted data — start fresh */
+  }
+  return { token: null, username: null };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [auth, setAuth] = useState<AuthState>({ token: null, username: null });
+  const [auth, setAuth] = useState<AuthState>(loadAuth);
 
   function login(token: string, username: string) {
-    setAuth({ token, username });
+    const state = { token, username };
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    setAuth(state);
   }
 
   function logout() {
+    sessionStorage.removeItem(STORAGE_KEY);
     setAuth({ token: null, username: null });
   }
 
