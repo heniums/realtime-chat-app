@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 // Manages socket connection lifecycle tied to auth state.
 // Connects when a token is present, disconnects on logout.
+// Emits a custom '_app:reconnected' event so hooks can react to reconnections.
 export function useSocket() {
   const { token } = useAuth();
   const [connected, setConnected] = useState(false);
@@ -12,11 +13,22 @@ export function useSocket() {
   useEffect(() => {
     if (!token) return;
 
+    let wasConnected = false;
+
     socket.auth = { token };
     socket.connect();
 
-    function onConnect() { setConnected(true); }
-    function onDisconnect() { setConnected(false); }
+    function onConnect() {
+      setConnected(true);
+      if (wasConnected) {
+        // This is a REconnection, not the first connection.
+        socket.emit('_app:reconnected');
+      }
+      wasConnected = true;
+    }
+    function onDisconnect() {
+      setConnected(false);
+    }
 
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
@@ -29,6 +41,28 @@ export function useSocket() {
   }, [token]);
 
   return { connected };
+}
+
+// Read-only hook for socket connection status.
+// Use this in pages/components that need to show connection state
+// without triggering connect/disconnect side effects.
+export function useConnected() {
+  const [connected, setConnected] = useState(socket.connected);
+
+  useEffect(() => {
+    function onConnect() { setConnected(true); }
+    function onDisconnect() { setConnected(false); }
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+
+    return () => {
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+    };
+  }, []);
+
+  return connected;
 }
 
 // Handles auth:login — listens for auth:token (success) or auth:error (fail).

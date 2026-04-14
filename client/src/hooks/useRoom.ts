@@ -15,6 +15,7 @@ interface RoomInfo {
 
 // Handles joining/leaving a specific room and tracks the online users list.
 // Server sends room:users whenever the user list changes.
+// Re-joins automatically on socket reconnection.
 export function useRoom(roomId: string | undefined) {
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [joined, setJoined] = useState(false);
@@ -38,13 +39,20 @@ export function useRoom(roomId: string | undefined) {
       setRoomError(message);
       setTimeout(() => setRoomError(null), 5000);
     }
+    function onReconnected() {
+      // Re-join after the socket reconnects so we get fresh room:users + message:history.
+      setJoined(false);
+      socket.emit(EVENTS.ROOM_JOIN, { roomId });
+    }
 
     socket.on(EVENTS.ROOM_USERS, onRoomUsers);
     socket.on(EVENTS.ROOM_ERROR, onRoomError);
+    socket.on('_app:reconnected', onReconnected);
 
     return () => {
       socket.off(EVENTS.ROOM_USERS, onRoomUsers);
       socket.off(EVENTS.ROOM_ERROR, onRoomError);
+      socket.off('_app:reconnected', onReconnected);
       socket.emit(EVENTS.ROOM_LEAVE, { roomId });
     };
   }, [roomId]);
