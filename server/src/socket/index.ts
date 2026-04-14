@@ -19,14 +19,14 @@ export function initSocket(httpServer: HttpServer): Server {
     },
   });
 
-  io.on("connection", (socket) => {
+  io.on(EVENTS.CONNECTION, (socket) => {
     console.log(`[socket] connected: ${socket.id}`);
 
     registerAuthHandlers(socket);
     registerRoomHandlers(socket, io);
     registerMessageHandlers(socket, io);
 
-    socket.on("disconnect", () => {
+    socket.on(EVENTS.DISCONNECT, () => {
       console.log(`[socket] disconnected: ${socket.id}`);
       const user = getUser(socket.id);
       if (user) {
