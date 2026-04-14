@@ -17,20 +17,26 @@ interface RoomInfo {
 // Server sends room:users whenever the user list changes.
 export function useRoom(roomId: string | undefined) {
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [joined, setJoined] = useState(false);
+  const [roomError, setRoomError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!roomId) return;
+    setJoined(false);
+    setRoomError(null);
+
     // Join the room — server will emit room:users + message:history in response.
     socket.emit(EVENTS.ROOM_JOIN, { roomId });
-    console.log('joining room', roomId);
 
     function onRoomUsers({ roomId: rid, users }: { roomId: string; users: RoomUser[] }) {
       if (rid === roomId) {
         setOnlineUsers(users.map((u) => u.username));
+        setJoined(true);
       }
     }
     function onRoomError({ message }: { message: string }) {
-      console.error('[room error]', message);
+      setRoomError(message);
+      setTimeout(() => setRoomError(null), 5000);
     }
 
     socket.on(EVENTS.ROOM_USERS, onRoomUsers);
@@ -39,12 +45,11 @@ export function useRoom(roomId: string | undefined) {
     return () => {
       socket.off(EVENTS.ROOM_USERS, onRoomUsers);
       socket.off(EVENTS.ROOM_ERROR, onRoomError);
-      console.log('leaving room', roomId);
       socket.emit(EVENTS.ROOM_LEAVE, { roomId });
     };
   }, [roomId]);
 
-  return { onlineUsers };
+  return { onlineUsers, joined, roomError };
 }
 
 // Fetches the list of all rooms.
