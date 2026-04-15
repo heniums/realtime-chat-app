@@ -1,10 +1,11 @@
 import { Socket } from "socket.io";
 import jwt from "jsonwebtoken";
-import { JwtPayload } from "../types";
+import { JwtPayload, EVENTS } from "../types";
 import {
   addUser,
   cancelUserRemoval,
   getUserByUsername,
+  getUsersInRoom,
   transferUser,
 } from "../store";
 
@@ -32,13 +33,22 @@ export function authMiddleware(
 
     if (wasPending) {
       // The old user entry still exists in the store under the old socket.id.
-      // Transfer it to the new socket.id (creates fresh entry with empty rooms).
+      // Transfer it to the new socket.id, preserving room memberships.
       const oldUser = getUserByUsername(payload.username);
       if (oldUser) {
         console.log(
           `[auth] reconnected: ${payload.username} (${oldUser.id} → ${socket.id})`,
         );
-        transferUser(oldUser.id, socket.id, payload.username);
+        const user = transferUser(oldUser.id, socket.id, payload.username);
+
+        // Re-join Socket.IO rooms and broadcast updated (online) user lists.
+        for (const roomId of user.rooms) {
+          socket.join(roomId);
+          socket.to(roomId).emit(EVENTS.ROOM_USERS, {
+            roomId,
+            users: getUsersInRoom(roomId),
+          });
+        }
       } else {
         // Edge case: timer was pending but user entry is gone (shouldn't happen).
         addUser(socket.id, payload.username);

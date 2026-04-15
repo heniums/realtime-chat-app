@@ -15,9 +15,7 @@ export const EVENTS = {
   AUTH_TOKEN: "auth:token",
   AUTH_ERROR: "auth:error",
   ROOM_CREATED: "room:created",
-  ROOM_LIST_RESPONSE: "room:list",
-  ROOM_USER_JOINED: "room:user_joined",
-  ROOM_USER_LEFT: "room:user_left",
+  ROOM_LIST_RESPONSE: "room:list:response",
   ROOM_USERS: "room:users",
   ROOM_ERROR: "room:error",
   MESSAGE_RECEIVED: "message:received",
@@ -31,12 +29,22 @@ export const EVENTS = {
   DISCONNECT: "disconnect",
 } as const;
 
+// ─── User Status Constants ────────────────────────────────────────────────────
+
+export const USER_STATUS = {
+  ONLINE: "online",
+  OFFLINE: "offline",
+} as const;
+
+export type UserStatus = (typeof USER_STATUS)[keyof typeof USER_STATUS];
+
 // ─── Data Models ──────────────────────────────────────────────────────────────
 
 export interface User {
   id: string; // socket.id at time of login
   username: string;
   rooms: string[]; // room IDs currently joined
+  status: UserStatus;
 }
 
 export interface Room {

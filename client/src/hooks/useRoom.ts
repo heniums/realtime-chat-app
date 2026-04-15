@@ -1,23 +1,27 @@
 import { useEffect, useState } from 'react';
 import socket from '../socket/client';
-import { EVENTS } from '../socket/events';
+import { EVENTS, type UserStatus } from '../socket/events';
 
 interface RoomUser {
   id: string;
   username: string;
+  status: UserStatus;
 }
+
+export type OnlineUser = { username: string; status: UserStatus };
 
 interface RoomInfo {
   id: string;
   name: string;
   userCount: number;
+  onlineCount: number;
 }
 
 // Handles joining/leaving a specific room and tracks the online users list.
 // Server sends room:users whenever the user list changes.
 // Re-joins automatically on socket reconnection.
 export function useRoom(roomId: string | undefined) {
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [joined, setJoined] = useState(false);
   const [roomError, setRoomError] = useState<string | null>(null);
 
@@ -35,7 +39,7 @@ export function useRoom(roomId: string | undefined) {
 
     function onRoomUsers({ roomId: rid, users }: { roomId: string; users: RoomUser[] }) {
       if (rid === roomId) {
-        setOnlineUsers(users.map((u) => u.username));
+        setOnlineUsers(users.map((u) => ({ username: u.username, status: u.status })));
         setJoined(true);
       }
     }

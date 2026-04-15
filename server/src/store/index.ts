@@ -1,4 +1,4 @@
-import { User, Room, Message } from "../types";
+import { User, UserStatus, Room, Message, USER_STATUS } from "../types";
 
 // ─── Store Shape ─────────────────────────────────────────────────────────────
 
@@ -23,7 +23,12 @@ const MAX_HISTORY = 50;
 // ─── User Operations ──────────────────────────────────────────────────────────
 
 export function addUser(socketId: string, username: string): User {
-  const user: User = { id: socketId, username, rooms: [] };
+  const user: User = {
+    id: socketId,
+    username,
+    rooms: [],
+    status: USER_STATUS.ONLINE,
+  };
   users.set(socketId, user);
   return user;
 }
@@ -81,17 +86,46 @@ export function cancelUserRemoval(username: string): boolean {
 
 /**
  * Transfer a reconnecting user from the old socket ID to the new one.
- * Creates a fresh entry with empty rooms — the client re-joins rooms
- * automatically via the useRoom hook's CONNECT listener.
+ * Preserves room memberships so the user stays visible in rooms they were in.
+ * Also updates the room userIds arrays to reference the new socket ID.
  */
 export function transferUser(
   oldSocketId: string,
   newSocketId: string,
   username: string,
 ): User {
+  const oldUser = users.get(oldSocketId);
+  const preservedRooms = oldUser?.rooms ?? [];
+
+  // Update room userIds to reference the new socket ID
+  for (const roomId of preservedRooms) {
+    const room = rooms.get(roomId);
+    if (room) {
+      const idx = room.userIds.indexOf(oldSocketId);
+      if (idx !== -1) room.userIds[idx] = newSocketId;
+    }
+  }
+
   users.delete(oldSocketId);
-  const user: User = { id: newSocketId, username, rooms: [] };
+  const user: User = {
+    id: newSocketId,
+    username,
+    rooms: preservedRooms,
+    status: USER_STATUS.ONLINE,
+  };
   users.set(newSocketId, user);
+  return user;
+}
+
+/**
+ * Update a user's online/offline status.
+ */
+export function setUserStatus(
+  socketId: string,
+  status: UserStatus,
+): User | undefined {
+  const user = users.get(socketId);
+  if (user) user.status = status;
   return user;
 }
 
@@ -173,6 +207,7 @@ export function removeUserFromRoom(roomId: string, userId: string): void {
 export function getUsersInRoom(roomId: string): User[] {
   const room = rooms.get(roomId);
   if (!room) return [];
+
   return room.userIds
     .map((id) => users.get(id))
     .filter((u): u is User => u !== undefined);

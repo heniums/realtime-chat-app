@@ -1,5 +1,5 @@
 import { Socket, Server } from "socket.io";
-import { EVENTS } from "../../types";
+import { EVENTS, USER_STATUS } from "../../types";
 import {
   getUser,
   createRoom,
@@ -15,7 +15,16 @@ import {
 export function registerRoomHandlers(socket: Socket, io: Server): void {
   // ── room:list ──────────────────────────────────────────────────────────────
   socket.on(EVENTS.ROOM_LIST, () => {
-    socket.emit(EVENTS.ROOM_LIST_RESPONSE, listRooms());
+    const roomList = listRooms().map((room) => {
+      const users = getUsersInRoom(room.id);
+      return {
+        id: room.id,
+        name: room.name,
+        userCount: users.length,
+        onlineCount: users.filter((u) => u.status === USER_STATUS.ONLINE).length,
+      };
+    });
+    socket.emit(EVENTS.ROOM_LIST_RESPONSE, roomList);
   });
 
   // ── room:create ────────────────────────────────────────────────────────────
@@ -52,9 +61,6 @@ export function registerRoomHandlers(socket: Socket, io: Server): void {
     // Send history to the joining user
     socket.emit(EVENTS.MESSAGE_HISTORY, getMessages(roomId));
 
-    // Notify others in room
-    socket.to(roomId).emit(EVENTS.ROOM_USER_JOINED, { roomId, user });
-
     // Send updated user list to everyone in room
     io.to(roomId).emit(EVENTS.ROOM_USERS, {
       roomId,
@@ -70,9 +76,6 @@ export function registerRoomHandlers(socket: Socket, io: Server): void {
     socket.leave(roomId);
     removeUserFromRoom(roomId, socket.id);
 
-    socket
-      .to(roomId)
-      .emit(EVENTS.ROOM_USER_LEFT, { roomId, userId: socket.id });
     io.to(roomId).emit(EVENTS.ROOM_USERS, {
       roomId,
       users: getUsersInRoom(roomId),
