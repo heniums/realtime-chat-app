@@ -16,7 +16,7 @@ export const EVENTS = {
   AUTH_TOKEN: 'auth:token',
   AUTH_ERROR: 'auth:error',
   ROOM_CREATED: 'room:created',
-  ROOM_LIST_RESPONSE: 'room:list:response',
+  ROOM_LIST_RESPONSE: 'room:listed',
   ROOM_USERS: 'room:users',
   ROOM_ERROR: 'room:error',
   MESSAGE_RECEIVED: 'message:received',
