@@ -43,7 +43,12 @@ export function ReactionPicker({ onSelect }: ReactionPickerProps) {
         className="text-gray-400 hover:text-gray-600 text-sm px-1 opacity-0 group-hover:opacity-100 transition-opacity"
         aria-label="Add reaction"
       >
-        😀
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+          <line x1="9" y1="9" x2="9.01" y2="9" strokeLinecap="round" />
+          <line x1="15" y1="9" x2="15.01" y2="9" strokeLinecap="round" />
+        </svg>
       </button>
       {open && (
         <FloatingPortal>
