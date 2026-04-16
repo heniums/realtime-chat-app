@@ -3,6 +3,7 @@ import { Server as HttpServer } from "http";
 import { registerAuthHandlers } from "./handlers/auth";
 import { registerRoomHandlers } from "./handlers/room";
 import { registerMessageHandlers } from "./handlers/message";
+import { registerReactionHandlers } from "./handlers/reaction";
 import { authMiddleware } from "../middleware/auth";
 import {
   removeUser,
@@ -31,6 +32,7 @@ export function initSocket(httpServer: HttpServer): Server {
     registerAuthHandlers(socket);
     registerRoomHandlers(socket, io);
     registerMessageHandlers(socket, io);
+    registerReactionHandlers(socket, io);
 
     socket.on(EVENTS.DISCONNECT, () => {
       console.log(`[socket] disconnected: ${socket.id}`);

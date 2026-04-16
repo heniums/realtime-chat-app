@@ -21,6 +21,8 @@ export default function Chat() {
   const {
     messages,
     sendMessage,
+    addReaction,
+    removeReaction,
     bottomRef,
     scrollContainerRef,
     handleScroll,
@@ -114,6 +116,8 @@ export default function Chat() {
             onScroll={handleScroll}
             showScrollButton={showScrollButton}
             onScrollToBottom={scrollToBottom}
+            onAddReaction={addReaction}
+            onRemoveReaction={removeReaction}
           />
           <TypingIndicator users={othersTyping} />
           <MessageInput

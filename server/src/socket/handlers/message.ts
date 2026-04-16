@@ -45,7 +45,7 @@ export function registerMessageHandlers(socket: Socket, io: Server): void {
         return;
       }
 
-      const message: Message = {
+      const message: Omit<Message, "reactions"> = {
         id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
         roomId,
         userId: socket.id,

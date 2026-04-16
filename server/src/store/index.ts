@@ -1,4 +1,4 @@
-import { User, UserStatus, Room, Message, USER_STATUS } from "../types";
+import { User, UserStatus, Room, Message, Reaction, USER_STATUS } from "../types";
 
 // ─── Store Shape ─────────────────────────────────────────────────────────────
 
@@ -215,9 +215,9 @@ export function getUsersInRoom(roomId: string): User[] {
 
 // ─── Message Operations ───────────────────────────────────────────────────────
 
-export function addMessage(msg: Message): void {
+export function addMessage(msg: Omit<Message, "reactions">): void {
   const history = messages.get(msg.roomId) ?? [];
-  history.push(msg);
+  history.push({ ...msg, reactions: [] });
   if (history.length > MAX_HISTORY) history.shift();
   messages.set(msg.roomId, history);
 }
@@ -247,4 +247,52 @@ export function getTypingUsernames(roomId: string): string[] {
   return getTypingUsers(roomId)
     .map((id) => getUsersInRoom(roomId).find((u) => u.id === id)?.username)
     .filter((name): name is string => name !== undefined);
+}
+
+// ─── Reaction Operations ──────────────────────────────────────────────────────
+
+const MAX_REACTIONS_PER_MESSAGE = 20;
+
+function findMessage(roomId: string, messageId: string): Message | undefined {
+  return getMessages(roomId).find((m) => m.id === messageId);
+}
+
+export function addReaction(
+  roomId: string,
+  messageId: string,
+  emoji: string,
+  userId: string,
+): Reaction[] | null {
+  const msg = findMessage(roomId, messageId);
+  if (!msg) return null;
+
+  const existing = msg.reactions.find((r) => r.emoji === emoji);
+  if (existing) {
+    if (!existing.userIds.includes(userId)) {
+      existing.userIds.push(userId);
+    }
+  } else {
+    if (msg.reactions.length >= MAX_REACTIONS_PER_MESSAGE) return null;
+    msg.reactions.push({ emoji, userIds: [userId] });
+  }
+  return msg.reactions;
+}
+
+export function removeReaction(
+  roomId: string,
+  messageId: string,
+  emoji: string,
+  userId: string,
+): Reaction[] | null {
+  const msg = findMessage(roomId, messageId);
+  if (!msg) return null;
+
+  const existing = msg.reactions.find((r) => r.emoji === emoji);
+  if (!existing) return msg.reactions;
+
+  existing.userIds = existing.userIds.filter((id) => id !== userId);
+  if (existing.userIds.length === 0) {
+    msg.reactions = msg.reactions.filter((r) => r.emoji !== emoji);
+  }
+  return msg.reactions;
 }
