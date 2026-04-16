@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { useAuth } from '../context/AuthContext';
 import type { OnlineUser } from '../hooks/useRoom';
 import { USER_STATUS } from '../socket/events';
@@ -82,16 +83,18 @@ function UserList({ users, currentUser }: { users: OnlineUser[]; currentUser: st
       {sorted.map((user) => (
         <li
           key={user.username}
-          className={`flex items-center gap-2 px-4 py-1.5 text-sm ${
-            user.status === USER_STATUS.OFFLINE ? 'text-gray-400' : 'text-gray-700'
-          }`}
+          className={clsx('flex items-center gap-2 px-4 py-1.5 text-sm', {
+            'text-gray-400': user.status === USER_STATUS.OFFLINE,
+            'text-gray-700': user.status !== USER_STATUS.OFFLINE,
+          })}
         >
           <span
-            className={`w-2 h-2 rounded-full shrink-0 ${
-              user.status === USER_STATUS.ONLINE ? 'bg-green-400' : 'bg-gray-300'
-            }`}
+            className={clsx('w-2 h-2 rounded-full shrink-0', {
+              'bg-green-400': user.status === USER_STATUS.ONLINE,
+              'bg-gray-300': user.status !== USER_STATUS.ONLINE,
+            })}
           />
-          <span className={user.username === currentUser ? 'font-semibold' : ''}>
+          <span className={clsx({ 'font-semibold': user.username === currentUser })}>
             {user.username}
             {user.username === currentUser && (
               <span className="ml-1 text-xs text-gray-400">(you)</span>
