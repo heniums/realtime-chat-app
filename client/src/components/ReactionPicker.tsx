@@ -1,6 +1,6 @@
-import { useState } from "react";
-import EmojiPicker, { Theme } from "emoji-picker-react";
+import { lazy, Suspense, useState } from "react";
 import type { EmojiClickData } from "emoji-picker-react";
+import { Theme } from "emoji-picker-react";
 import {
   useFloating,
   autoUpdate,
@@ -12,6 +12,8 @@ import {
   useInteractions,
   FloatingPortal,
 } from "@floating-ui/react";
+
+const EmojiPicker = lazy(() => import("emoji-picker-react"));
 
 interface ReactionPickerProps {
   onSelect: (emoji: string) => void;
@@ -59,16 +61,24 @@ export function ReactionPicker({ onSelect }: ReactionPickerProps) {
             {...getFloatingProps()}
             className="z-50"
           >
-            <EmojiPicker
-              theme={Theme.LIGHT}
-              height={350}
-              width={300}
-              searchPlaceholder="Search emoji..."
-              onEmojiClick={(emojiData: EmojiClickData) => {
-                onSelect(emojiData.emoji);
-                setOpen(false);
-              }}
-            />
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center" style={{ width: 300, height: 350 }}>
+                  <span className="text-sm text-gray-400">Loading…</span>
+                </div>
+              }
+            >
+              <EmojiPicker
+                theme={Theme.LIGHT}
+                height={350}
+                width={300}
+                searchPlaceholder="Search emoji..."
+                onEmojiClick={(emojiData: EmojiClickData) => {
+                  onSelect(emojiData.emoji);
+                  setOpen(false);
+                }}
+              />
+            </Suspense>
           </div>
         </FloatingPortal>
       )}

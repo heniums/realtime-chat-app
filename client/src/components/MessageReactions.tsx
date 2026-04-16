@@ -1,9 +1,5 @@
 import clsx from 'clsx';
-
-interface Reaction {
-  emoji: string;
-  userIds: string[];
-}
+import type { Reaction } from '../../../shared/types';
 
 interface MessageReactionsProps {
   reactions: Reaction[];

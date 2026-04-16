@@ -1,4 +1,5 @@
 import { useState, type KeyboardEvent } from 'react';
+import clsx from 'clsx';
 
 const MAX_LENGTH = 1000;
 const WARN_THRESHOLD = 900;
@@ -54,9 +55,11 @@ export function MessageInput({ onSend, onTyping, onStopTyping, error }: MessageI
           />
           {charCount > 0 && (
             <span
-              className={`absolute bottom-1 right-2 text-[10px] ${
-                isAtLimit ? 'text-red-500 font-semibold' : isOverWarn ? 'text-amber-500' : 'text-gray-300'
-              }`}
+              className={clsx('absolute bottom-1 right-2 text-[10px]', {
+                'text-red-500 font-semibold': isAtLimit,
+                'text-amber-500': !isAtLimit && isOverWarn,
+                'text-gray-300': !isAtLimit && !isOverWarn,
+              })}
             >
               {charCount}/{MAX_LENGTH}
             </span>

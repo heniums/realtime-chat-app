@@ -4,20 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { ReactionPicker } from './ReactionPicker';
 import { MessageReactions } from './MessageReactions';
 import socket from '../socket/client';
-
-interface Reaction {
-  emoji: string;
-  userIds: string[];
-}
-
-interface Message {
-  id: string;
-  userId: string;
-  username: string;
-  text: string;
-  timestamp: number;
-  reactions: Reaction[];
-}
+import type { Message, Reaction } from '../../../shared/types';
 
 interface MessageListProps {
   messages: Message[];

@@ -1,21 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import socket from '../socket/client';
 import { EVENTS } from '../socket/events';
-
-interface Reaction {
-  emoji: string;
-  userIds: string[];
-}
-
-interface Message {
-  id: string;
-  roomId: string;
-  userId: string;
-  username: string;
-  text: string;
-  timestamp: number;
-  reactions: Reaction[];
-}
+import type { Message, Reaction } from '../../../shared/types';
 
 const NEAR_BOTTOM_THRESHOLD = 100;
 
