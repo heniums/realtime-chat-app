@@ -9,6 +9,7 @@ import { MessageList } from '../components/MessageList';
 import { MessageInput } from '../components/MessageInput';
 import { OnlineUsers } from '../components/OnlineUsers';
 import { TypingIndicator } from '../components/TypingIndicator';
+import { USER_STATUS } from '../socket/events';
 
 export default function Chat() {
   const { id: roomId } = useParams<{ id: string }>();
@@ -98,7 +99,7 @@ export default function Chat() {
           className="md:hidden text-xs text-gray-500 border border-gray-300 rounded-lg px-2 py-1 hover:bg-gray-50"
           aria-label="Show online users"
         >
-          Users ({onlineUsers.length})
+          Users ({onlineUsers.filter((u) => u.status === USER_STATUS.ONLINE).length})
         </button>
       </header>
 

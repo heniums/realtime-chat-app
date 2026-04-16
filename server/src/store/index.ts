@@ -1,4 +1,4 @@
-import { User, Room, Message } from "../types";
+import { User, UserStatus, Room, Message, USER_STATUS } from "../types";
 
 // ─── Store Shape ─────────────────────────────────────────────────────────────
 
@@ -12,12 +12,23 @@ const typing = new Map<string, Set<string>>(); // roomId → Set<userId>
 const ROOM_DELETE_GRACE_MS = 5_000;
 const roomDeletionTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
+// Grace period before removing a disconnected user (ms).
+// Keeps the username reserved so a reconnecting client (page reload, brief
+// network drop) can reclaim it within this window.
+const USER_DISCONNECT_GRACE_MS = 30_000;
+const userDisconnectTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
 const MAX_HISTORY = 50;
 
 // ─── User Operations ──────────────────────────────────────────────────────────
 
 export function addUser(socketId: string, username: string): User {
-  const user: User = { id: socketId, username, rooms: [] };
+  const user: User = {
+    id: socketId,
+    username,
+    rooms: [],
+    status: USER_STATUS.ONLINE,
+  };
   users.set(socketId, user);
   return user;
 }
@@ -36,6 +47,85 @@ export function getUserByUsername(username: string): User | undefined {
 export function removeUser(socketId: string): User | undefined {
   const user = users.get(socketId);
   users.delete(socketId);
+  return user;
+}
+
+/**
+ * Schedule a user for removal after the grace period.
+ * The cleanup callback handles the actual removeUser call (which needs the
+ * correct socketId captured at disconnect time).
+ */
+export function scheduleUserRemoval(
+  username: string,
+  cleanup: () => void,
+): void {
+  // Cancel any existing timer for this username (shouldn't happen, but be safe)
+  cancelUserRemoval(username);
+
+  const timer = setTimeout(() => {
+    userDisconnectTimers.delete(username);
+    cleanup();
+  }, USER_DISCONNECT_GRACE_MS);
+
+  userDisconnectTimers.set(username, timer);
+}
+
+/**
+ * Cancel a pending user removal. Returns true if a timer was cancelled
+ * (meaning the user reconnected within the grace window).
+ */
+export function cancelUserRemoval(username: string): boolean {
+  const timer = userDisconnectTimers.get(username);
+  if (timer) {
+    clearTimeout(timer);
+    userDisconnectTimers.delete(username);
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Transfer a reconnecting user from the old socket ID to the new one.
+ * Preserves room memberships so the user stays visible in rooms they were in.
+ * Also updates the room userIds arrays to reference the new socket ID.
+ */
+export function transferUser(
+  oldSocketId: string,
+  newSocketId: string,
+  username: string,
+): User {
+  const oldUser = users.get(oldSocketId);
+  const preservedRooms = oldUser?.rooms ?? [];
+
+  // Update room userIds to reference the new socket ID
+  for (const roomId of preservedRooms) {
+    const room = rooms.get(roomId);
+    if (room) {
+      const idx = room.userIds.indexOf(oldSocketId);
+      if (idx !== -1) room.userIds[idx] = newSocketId;
+    }
+  }
+
+  users.delete(oldSocketId);
+  const user: User = {
+    id: newSocketId,
+    username,
+    rooms: preservedRooms,
+    status: USER_STATUS.ONLINE,
+  };
+  users.set(newSocketId, user);
+  return user;
+}
+
+/**
+ * Update a user's online/offline status.
+ */
+export function setUserStatus(
+  socketId: string,
+  status: UserStatus,
+): User | undefined {
+  const user = users.get(socketId);
+  if (user) user.status = status;
   return user;
 }
 
@@ -117,6 +207,7 @@ export function removeUserFromRoom(roomId: string, userId: string): void {
 export function getUsersInRoom(roomId: string): User[] {
   const room = rooms.get(roomId);
   if (!room) return [];
+
   return room.userIds
     .map((id) => users.get(id))
     .filter((u): u is User => u !== undefined);

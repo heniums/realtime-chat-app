@@ -10,6 +10,7 @@ interface RoomInfo {
   id: string;
   name: string;
   userCount: number;
+  onlineCount: number;
 }
 
 export default function Rooms() {
@@ -116,7 +117,7 @@ export default function Rooms() {
                   >
                     <span className="text-sm font-medium text-gray-800">{room.name}</span>
                     <span className="text-xs text-gray-400">
-                      {room.userCount} {room.userCount === 1 ? 'person' : 'people'}
+                      {room.onlineCount} online · {room.userCount} {room.userCount === 1 ? 'person' : 'people'}
                     </span>
                   </button>
                 </li>

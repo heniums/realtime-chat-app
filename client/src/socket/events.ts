@@ -16,9 +16,7 @@ export const EVENTS = {
   AUTH_TOKEN: 'auth:token',
   AUTH_ERROR: 'auth:error',
   ROOM_CREATED: 'room:created',
-  ROOM_LIST_RESPONSE: 'room:list',
-  ROOM_USER_JOINED: 'room:user_joined',
-  ROOM_USER_LEFT: 'room:user_left',
+  ROOM_LIST_RESPONSE: 'room:listed',
   ROOM_USERS: 'room:users',
   ROOM_ERROR: 'room:error',
   MESSAGE_RECEIVED: 'message:received',
@@ -32,3 +30,11 @@ export const EVENTS = {
 } as const;
 
 export type EventValue = (typeof EVENTS)[keyof typeof EVENTS];
+
+// Mirror of server/src/types/index.ts — keep in sync.
+export const USER_STATUS = {
+  ONLINE: 'online',
+  OFFLINE: 'offline',
+} as const;
+
+export type UserStatus = (typeof USER_STATUS)[keyof typeof USER_STATUS];
