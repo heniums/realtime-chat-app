@@ -2,6 +2,11 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import socket from '../socket/client';
 import { EVENTS } from '../socket/events';
 
+interface Reaction {
+  emoji: string;
+  userIds: string[];
+}
+
 interface Message {
   id: string;
   roomId: string;
@@ -9,6 +14,7 @@ interface Message {
   username: string;
   text: string;
   timestamp: number;
+  reactions: Reaction[];
 }
 
 const NEAR_BOTTOM_THRESHOLD = 100;
@@ -75,15 +81,29 @@ export function useMessages(roomId: string | undefined) {
       setMessageError(message);
       setTimeout(() => setMessageError(null), 5000);
     }
+    function onReactionUpdated({
+      messageId,
+      reactions,
+    }: {
+      roomId: string;
+      messageId: string;
+      reactions: Reaction[];
+    }) {
+      setMessages((prev) =>
+        prev.map((m) => (m.id === messageId ? { ...m, reactions } : m)),
+      );
+    }
 
     socket.on(EVENTS.MESSAGE_HISTORY, onHistory);
     socket.on(EVENTS.MESSAGE_RECEIVED, onNewMessage);
     socket.on(EVENTS.MESSAGE_ERROR, onMessageError);
+    socket.on(EVENTS.REACTION_UPDATED, onReactionUpdated);
 
     return () => {
       socket.off(EVENTS.MESSAGE_HISTORY, onHistory);
       socket.off(EVENTS.MESSAGE_RECEIVED, onNewMessage);
       socket.off(EVENTS.MESSAGE_ERROR, onMessageError);
+      socket.off(EVENTS.REACTION_UPDATED, onReactionUpdated);
       setMessages([]);
       setMessageError(null);
       setShowScrollButton(false);
@@ -100,14 +120,25 @@ export function useMessages(roomId: string | undefined) {
   function sendMessage(text: string) {
     if (!roomId || !text.trim()) return;
     socket.emit(EVENTS.MESSAGE_SEND, { roomId, text: text.trim() });
-    // Always scroll to bottom when the user themselves sends a message.
     isNearBottomRef.current = true;
     setShowScrollButton(false);
+  }
+
+  function addReaction(messageId: string, emoji: string) {
+    if (!roomId) return;
+    socket.emit(EVENTS.REACTION_ADD, { roomId, messageId, emoji });
+  }
+
+  function removeReaction(messageId: string, emoji: string) {
+    if (!roomId) return;
+    socket.emit(EVENTS.REACTION_REMOVE, { roomId, messageId, emoji });
   }
 
   return {
     messages,
     sendMessage,
+    addReaction,
+    removeReaction,
     bottomRef,
     scrollContainerRef,
     handleScroll,

@@ -10,6 +10,8 @@ export const EVENTS = {
   MESSAGE_SEND: "message:send",
   TYPING_START: "typing:start",
   TYPING_STOP: "typing:stop",
+  REACTION_ADD: "reaction:add",
+  REACTION_REMOVE: "reaction:remove",
 
   // Server → Client
   AUTH_TOKEN: "auth:token",
@@ -22,6 +24,7 @@ export const EVENTS = {
   MESSAGE_HISTORY: "message:history",
   MESSAGE_ERROR: "message:error",
   TYPING_UPDATE: "typing:update",
+  REACTION_UPDATED: "reaction:updated",
 
   // Socket.IO built-in events
   CONNECTION: "connection",
@@ -54,6 +57,11 @@ export interface Room {
   userIds: string[]; // user IDs currently in room
 }
 
+export interface Reaction {
+  emoji: string;
+  userIds: string[];
+}
+
 export interface Message {
   id: string;
   roomId: string;
@@ -61,6 +69,7 @@ export interface Message {
   username: string;
   text: string;
   timestamp: Date;
+  reactions: Reaction[];
 }
 
 // ─── JWT Payload ──────────────────────────────────────────────────────────────

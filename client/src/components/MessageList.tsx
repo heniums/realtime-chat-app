@@ -1,5 +1,14 @@
 import { type RefObject } from 'react';
+import clsx from 'clsx';
 import { useAuth } from '../context/AuthContext';
+import { ReactionPicker } from './ReactionPicker';
+import { MessageReactions } from './MessageReactions';
+import socket from '../socket/client';
+
+interface Reaction {
+  emoji: string;
+  userIds: string[];
+}
 
 interface Message {
   id: string;
@@ -7,6 +16,7 @@ interface Message {
   username: string;
   text: string;
   timestamp: number;
+  reactions: Reaction[];
 }
 
 interface MessageListProps {
@@ -16,6 +26,8 @@ interface MessageListProps {
   onScroll: () => void;
   showScrollButton: boolean;
   onScrollToBottom: () => void;
+  onAddReaction: (messageId: string, emoji: string) => void;
+  onRemoveReaction: (messageId: string, emoji: string) => void;
 }
 
 export function MessageList({
@@ -25,8 +37,11 @@ export function MessageList({
   onScroll,
   showScrollButton,
   onScrollToBottom,
+  onAddReaction,
+  onRemoveReaction,
 }: MessageListProps) {
   const { username: currentUser } = useAuth();
+  const currentSocketId = socket.id ?? '';
 
   if (messages.length === 0) {
     return (
@@ -34,6 +49,15 @@ export function MessageList({
         No messages yet. Say hello!
       </div>
     );
+  }
+
+  function handleReactionToggle(messageId: string, emoji: string, reactions: Reaction[]) {
+    const existing = reactions.find((r) => r.emoji === emoji);
+    if (existing && existing.userIds.includes(currentSocketId)) {
+      onRemoveReaction(messageId, emoji);
+    } else {
+      onAddReaction(messageId, emoji);
+    }
   }
 
   return (
@@ -48,18 +72,40 @@ export function MessageList({
           return (
             <div
               key={msg.id}
-              className={`flex flex-col gap-1 ${isMine ? 'items-end' : 'items-start'}`}
+              className={clsx('group flex flex-col gap-1', {
+                'items-end': isMine,
+                'items-start': !isMine,
+              })}
             >
               <span className="text-xs text-gray-400">{msg.username}</span>
-              <div
-                className={`max-w-xs lg:max-w-md px-3 py-2 rounded-2xl text-sm break-words ${
-                  isMine
-                    ? 'bg-indigo-500 text-white rounded-br-sm'
-                    : 'bg-gray-100 text-gray-900 rounded-bl-sm'
-                }`}
-              >
-                {msg.text}
+              <div className="flex items-center gap-1">
+                {isMine && (
+                  <ReactionPicker
+                    onSelect={(emoji) => onAddReaction(msg.id, emoji)}
+                  />
+                )}
+                <div
+                  className={clsx(
+                    'max-w-xs lg:max-w-md px-3 py-2 rounded-2xl text-sm wrap-break-words',
+                    {
+                      'bg-indigo-500 text-white rounded-br-sm': isMine,
+                      'bg-gray-100 text-gray-900 rounded-bl-sm': !isMine,
+                    },
+                  )}
+                >
+                  {msg.text}
+                </div>
+                {!isMine && (
+                  <ReactionPicker
+                    onSelect={(emoji) => onAddReaction(msg.id, emoji)}
+                  />
+                )}
               </div>
+              <MessageReactions
+                reactions={msg.reactions ?? []}
+                currentUserId={currentSocketId}
+                onToggle={(emoji) => handleReactionToggle(msg.id, emoji, msg.reactions ?? [])}
+              />
               <span className="text-xs text-gray-300">
                 {new Date(msg.timestamp).toLocaleTimeString([], {
                   hour: '2-digit',
