@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented here.
 
+## [v0.4.5] - 2026-04-17
+
+### Added
+
+- Client Dockerfile with multi-stage build (Node build + nginx serve)
+- nginx.conf with SPA routing support
+
+### Fixed
+
+- Fix ineffective dynamic import warning for emoji-picker-react
+
 ## [v0.4.3] - 2026-04-17
 
 ### Fixed
