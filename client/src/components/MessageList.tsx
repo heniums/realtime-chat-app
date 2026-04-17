@@ -73,7 +73,7 @@ export function MessageList({
                 )}
                 <div
                   className={clsx(
-                    'max-w-xs lg:max-w-md px-3 py-2 rounded-2xl text-sm wrap-break-words',
+                    'max-w-xs lg:max-w-md px-3 py-2 rounded-2xl text-sm wrap-anywhere',
                     {
                       'bg-indigo-500 text-white rounded-br-sm': isMine,
                       'bg-gray-100 text-gray-900 rounded-bl-sm': !isMine,
