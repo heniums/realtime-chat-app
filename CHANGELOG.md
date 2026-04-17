@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented here.
 
+## [v0.4.4] - 2026-04-17
+
+### Added
+
+- Root dev script to start both client and server concurrently
+
+### Changed
+
+- Broadcast room list to all clients on room join/leave
+
 ## [v0.4.3] - 2026-04-17
 
 ### Fixed
