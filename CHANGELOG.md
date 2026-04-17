@@ -13,6 +13,12 @@ All notable changes to this project will be documented here.
 
 - Fix ineffective dynamic import warning for emoji-picker-react
 
+## [v0.4.4] - 2026-04-17
+
+### Fixed
+
+- Room count doesn't increase on join
+
 ## [v0.4.3] - 2026-04-17
 
 ### Fixed
@@ -116,3 +122,16 @@ All notable changes to this project will be documented here.
 
 - Back-end core with Socket.IO (rooms, messaging, typing indicators)
 - Phase 1 & 2 documentation
+
+[v0.4.5]: https://github.com/heniums/realtime-chat-app/compare/v0.4.4...v0.4.5
+[v0.4.4]: https://github.com/heniums/realtime-chat-app/compare/v0.4.3...v0.4.4
+[v0.4.3]: https://github.com/heniums/realtime-chat-app/compare/v0.4.2...v0.4.3
+[v0.4.2]: https://github.com/heniums/realtime-chat-app/compare/v0.4.1...v0.4.2
+[v0.4.1]: https://github.com/heniums/realtime-chat-app/compare/v0.4.0...v0.4.1
+[v0.4.0]: https://github.com/heniums/realtime-chat-app/compare/v0.3.0...v0.4.0
+[v0.3.0]: https://github.com/heniums/realtime-chat-app/compare/v0.2.0...v0.3.0
+[v0.2.0]: https://github.com/heniums/realtime-chat-app/compare/v0.1.3...v0.2.0
+[v0.1.3]: https://github.com/heniums/realtime-chat-app/compare/v0.1.2...v0.1.3
+[v0.1.2]: https://github.com/heniums/realtime-chat-app/compare/v0.1.1...v0.1.2
+[v0.1.1]: https://github.com/heniums/realtime-chat-app/compare/v0.1.0...v0.1.1
+[v0.1.0]: https://github.com/heniums/realtime-chat-app/releases/tag/v0.1.0
