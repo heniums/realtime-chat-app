@@ -17,7 +17,7 @@ export default function Chat() {
   const { username } = useAuth();
   const connected = useConnected();
 
-  const { onlineUsers, joined, roomError } = useRoom(roomId);
+  const { onlineUsers, joined, roomError, roomNotFound } = useRoom(roomId);
   const {
     messages,
     sendMessage,
@@ -42,6 +42,35 @@ export default function Chat() {
 
   // Filter current user out of the typing indicator.
   const othersTyping = typingUsers.filter((u) => u !== username);
+
+  // Room not found — show message with link back to rooms.
+  if (roomNotFound) {
+    return (
+      <div className="flex flex-col h-screen bg-white">
+        <header className="border-b border-gray-200 px-4 py-3 flex items-center gap-3 shrink-0">
+          <button
+            onClick={() => navigate('/rooms')}
+            className="text-gray-400 hover:text-gray-600"
+            aria-label="Back to rooms"
+          >
+            ←
+          </button>
+          <h1 className="text-sm font-semibold text-gray-900">Room not found</h1>
+        </header>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3 text-gray-500">
+            <p className="text-sm">This room doesn't exist or has been deleted.</p>
+            <button
+              onClick={() => navigate('/rooms')}
+              className="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
+            >
+              ← Back to rooms
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Loading state — show spinner until room is joined.
   if (!joined) {

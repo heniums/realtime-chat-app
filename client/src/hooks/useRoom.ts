@@ -24,6 +24,7 @@ export function useRoom(roomId: string | undefined) {
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [joined, setJoined] = useState(false);
   const [roomError, setRoomError] = useState<string | null>(null);
+  const [roomNotFound, setRoomNotFound] = useState(false);
 
   useEffect(() => {
     if (!roomId) return;
@@ -33,6 +34,7 @@ export function useRoom(roomId: string | undefined) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setJoined(false);
     setRoomError(null);
+    setRoomNotFound(false);
 
     // Join the room — server will emit room:users + message:history in response.
     socket.emit(EVENTS.ROOM_JOIN, { roomId });
@@ -45,7 +47,11 @@ export function useRoom(roomId: string | undefined) {
     }
     function onRoomError({ message }: { message: string }) {
       setRoomError(message);
-      setTimeout(() => setRoomError(null), 5000);
+      if (message === 'Room not found') {
+        setRoomNotFound(true);
+      } else {
+        setTimeout(() => setRoomError(null), 5000);
+      }
     }
     function onReconnected() {
       // EVENTS.CONNECT fires on every (re)connection. Since the socket is already
@@ -67,7 +73,7 @@ export function useRoom(roomId: string | undefined) {
     };
   }, [roomId]);
 
-  return { onlineUsers, joined, roomError };
+  return { onlineUsers, joined, roomError, roomNotFound };
 }
 
 // Fetches the list of all rooms.
