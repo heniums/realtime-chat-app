@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import type { EmojiClickData } from "emoji-picker-react";
+import type { EmojiClickData, Theme } from "emoji-picker-react";
 import {
   useFloating,
   autoUpdate,
@@ -68,7 +68,7 @@ export function ReactionPicker({ onSelect }: ReactionPickerProps) {
               }
             >
               <EmojiPicker
-                theme={"light" as const}
+                theme={"light" as Theme}
                 height={350}
                 width={300}
                 searchPlaceholder="Search emoji..."
