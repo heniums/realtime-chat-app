@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here.
 
+## [v0.4.3] - 2026-04-17
+
+### Fixed
+
+- Hang in room when room doesn't exist
+
 ## [v0.4.2] - 2026-04-17
 
 ### Fixed
