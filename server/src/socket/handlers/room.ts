@@ -66,6 +66,17 @@ export function registerRoomHandlers(socket: Socket, io: Server): void {
       roomId,
       users: getUsersInRoom(roomId),
     });
+
+    // Broadcast updated room list so all clients see the new userCount
+    io.emit(EVENTS.ROOM_LIST_RESPONSE, listRooms().map((r) => {
+      const users = getUsersInRoom(r.id);
+      return {
+        id: r.id,
+        name: r.name,
+        userCount: users.length,
+        onlineCount: users.filter((u) => u.status === USER_STATUS.ONLINE).length,
+      };
+    }));
   });
 
   // ── room:leave ─────────────────────────────────────────────────────────────
@@ -80,5 +91,16 @@ export function registerRoomHandlers(socket: Socket, io: Server): void {
       roomId,
       users: getUsersInRoom(roomId),
     });
+
+    // Broadcast updated room list so all clients see the new userCount
+    io.emit(EVENTS.ROOM_LIST_RESPONSE, listRooms().map((r) => {
+      const users = getUsersInRoom(r.id);
+      return {
+        id: r.id,
+        name: r.name,
+        userCount: users.length,
+        onlineCount: users.filter((u) => u.status === USER_STATUS.ONLINE).length,
+      };
+    }));
   });
 }
