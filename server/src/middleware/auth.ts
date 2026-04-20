@@ -10,8 +10,8 @@ import {
   getUsersInRoom,
   transferUser,
 } from "../store";
+import { JWT_SECRET } from "../config/env";
 
-const JWT_SECRET = process.env.JWT_SECRET ?? "fallback_secret";
 const COOKIE_NAME = "token";
 
 /**

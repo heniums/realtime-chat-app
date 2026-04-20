@@ -1,5 +1,7 @@
 import { z } from "zod/v4";
 
+export { JWT_SECRET } from "../config/env";
+
 export const registerSchema = z.object({
   username: z
     .string()
@@ -14,7 +16,6 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-export const JWT_SECRET = process.env.JWT_SECRET ?? "fallback_secret";
 export const JWT_EXPIRES_IN = "7d";
 export const COOKIE_NAME = "token";
 export const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
