@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import pool from "../db";
 import { verifyPassword } from "./password";
 import { JwtPayload } from "../types";
 import { loginSchema, JWT_SECRET, JWT_EXPIRES_IN, setTokenCookie } from "./schemas";
+import { findUserWithHashByUsername } from "../db/queries/users";
 
 export async function login(req: Request, res: Response): Promise<void> {
   try {
@@ -15,17 +15,13 @@ export async function login(req: Request, res: Response): Promise<void> {
 
     const { username, password } = parsed.data;
 
-    const result = await pool.query(
-      "SELECT id, username, password_hash FROM users WHERE username = $1",
-      [username.trim()],
-    );
-    if (result.rows.length === 0) {
+    const user = await findUserWithHashByUsername(username);
+    if (!user) {
       res.status(401).json({ error: "Invalid username or password" });
       return;
     }
 
-    const user = result.rows[0];
-    const valid = await verifyPassword(password, user.password_hash);
+    const valid = await verifyPassword(password, user.passwordHash);
     if (!valid) {
       res.status(401).json({ error: "Invalid username or password" });
       return;

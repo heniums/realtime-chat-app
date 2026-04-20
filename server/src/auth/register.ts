@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import pool from "../db";
 import { hashPassword } from "./password";
 import { JwtPayload } from "../types";
 import { registerSchema, JWT_SECRET, JWT_EXPIRES_IN, setTokenCookie } from "./schemas";
+import { findUserByUsername, createUser } from "../db/queries/users";
 
 export async function register(req: Request, res: Response): Promise<void> {
   try {
@@ -15,21 +15,14 @@ export async function register(req: Request, res: Response): Promise<void> {
 
     const { username, password } = parsed.data;
 
-    const existing = await pool.query(
-      "SELECT id FROM users WHERE username = $1",
-      [username],
-    );
-    if (existing.rows.length > 0) {
+    const existing = await findUserByUsername(username);
+    if (existing) {
       res.status(409).json({ error: "Username already taken" });
       return;
     }
 
     const hash = await hashPassword(password);
-    const result = await pool.query(
-      "INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username",
-      [username, hash],
-    );
-    const user = result.rows[0];
+    const user = await createUser(username, hash);
 
     const payload: JwtPayload = { userId: user.id, username: user.username };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });

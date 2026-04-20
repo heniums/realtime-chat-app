@@ -2,7 +2,6 @@ import { Socket } from "socket.io";
 import jwt from "jsonwebtoken";
 import cookie from "cookie";
 import { JwtPayload, EVENTS } from "../types";
-import pool from "../db";
 import {
   addUser,
   cancelUserRemoval,
@@ -11,6 +10,7 @@ import {
   transferUser,
 } from "../store";
 import { JWT_SECRET } from "../config/env";
+import { findUserById } from "../db/queries/users";
 
 const COOKIE_NAME = "token";
 
@@ -51,15 +51,10 @@ export async function authMiddleware(
     const payload = jwt.verify(token, JWT_SECRET) as JwtPayload;
 
     // Verify user still exists in DB
-    const result = await pool.query(
-      "SELECT id, username FROM users WHERE id = $1",
-      [payload.userId],
-    );
-    if (result.rows.length === 0) {
+    const dbUser = await findUserById(payload.userId);
+    if (!dbUser) {
       return next(new Error("User not found"));
     }
-
-    const dbUser = result.rows[0];
 
     // Handle reconnection (grace period)
     const wasPending = cancelUserRemoval(dbUser.username);
