@@ -1,6 +1,8 @@
 import { Socket } from "socket.io";
 import jwt from "jsonwebtoken";
+import cookie from "cookie";
 import { JwtPayload, EVENTS } from "../types";
+import pool from "../db";
 import {
   addUser,
   cancelUserRemoval,
@@ -9,39 +11,67 @@ import {
   transferUser,
 } from "../store";
 
-// Socket.IO connection middleware — runs before the "connection" event fires.
-// If the client sends a JWT token via socket.auth, this middleware verifies it
-// and re-registers the user in the in-memory store (critical for reconnection).
-// First-time users (no token) pass through to use the auth:login event handler.
-export function authMiddleware(
+const JWT_SECRET = process.env.JWT_SECRET ?? "fallback_secret";
+const COOKIE_NAME = "token";
+
+/**
+ * Socket.IO connection middleware.
+ *
+ * Reads JWT from:
+ *  1. httpOnly cookie (primary — set by REST /auth/login or /auth/register)
+ *  2. socket.handshake.auth.token (fallback — for non-browser clients)
+ *
+ * Verifies the token, confirms the user exists in the DB, then
+ * re-registers them in the in-memory store for presence tracking.
+ *
+ * No token → reject (login is now REST-only, anonymous access removed).
+ */
+export async function authMiddleware(
   socket: Socket,
   next: (err?: Error) => void,
-): void {
-  const token = socket.handshake.auth?.token;
+): Promise<void> {
+  // Extract token from cookie or handshake auth
+  let token: string | undefined;
 
-  // No token = first-time user. Let them through to use auth:login.
+  const cookieHeader = socket.handshake.headers.cookie;
+  if (cookieHeader) {
+    const cookies = cookie.parse(cookieHeader);
+    token = cookies[COOKIE_NAME];
+  }
+
   if (!token) {
-    return next();
+    token = socket.handshake.auth?.token;
+  }
+
+  if (!token) {
+    return next(new Error("Authentication required"));
   }
 
   try {
-    const secret = process.env.JWT_SECRET ?? "fallback_secret";
-    const payload = jwt.verify(token, secret) as JwtPayload;
+    const payload = jwt.verify(token, JWT_SECRET) as JwtPayload;
 
-    // Check if this user has a pending disconnect (page reload / brief drop).
-    const wasPending = cancelUserRemoval(payload.username);
+    // Verify user still exists in DB
+    const result = await pool.query(
+      "SELECT id, username FROM users WHERE id = $1",
+      [payload.userId],
+    );
+    if (result.rows.length === 0) {
+      return next(new Error("User not found"));
+    }
+
+    const dbUser = result.rows[0];
+
+    // Handle reconnection (grace period)
+    const wasPending = cancelUserRemoval(dbUser.username);
 
     if (wasPending) {
-      // The old user entry still exists in the store under the old socket.id.
-      // Transfer it to the new socket.id, preserving room memberships.
-      const oldUser = getUserByUsername(payload.username);
+      const oldUser = getUserByUsername(dbUser.username);
       if (oldUser) {
         console.log(
-          `[auth] reconnected: ${payload.username} (${oldUser.id} → ${socket.id})`,
+          `[auth] reconnected: ${dbUser.username} (${oldUser.id} → ${socket.id})`,
         );
-        const user = transferUser(oldUser.id, socket.id, payload.username);
+        const user = transferUser(oldUser.id, socket.id, dbUser.username);
 
-        // Re-join Socket.IO rooms and broadcast updated (online) user lists.
         for (const roomId of user.rooms) {
           socket.join(roomId);
           socket.to(roomId).emit(EVENTS.ROOM_USERS, {
@@ -50,18 +80,15 @@ export function authMiddleware(
           });
         }
       } else {
-        // Edge case: timer was pending but user entry is gone (shouldn't happen).
-        addUser(socket.id, payload.username);
+        addUser(socket.id, dbUser.username);
       }
     } else {
-      // Normal reconnection (no pending timer) or first connection with a
-      // token from a previous session. Create a fresh user entry.
-      addUser(socket.id, payload.username);
+      addUser(socket.id, dbUser.username);
     }
 
-    // Attach user data to socket.data for handler access.
-    socket.data.userId = socket.id;
-    socket.data.username = payload.username;
+    // Attach DB user info to socket.data
+    socket.data.userId = dbUser.id; // Now a UUID, not socket.id
+    socket.data.username = dbUser.username;
 
     next();
   } catch {
