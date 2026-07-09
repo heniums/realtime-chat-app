@@ -33,10 +33,10 @@
     - [x] Update client/vite.config.ts to set `build.outDir` to a predictable path (e.g., `../dist/client`)
     - [x] Verify build output includes `index.html` and static assets
     - [x] Ensure Socket.IO client connects to correct URL in production
-- [ ] Task: Implement Express static file serving in production
-    - [ ] Add middleware to serve `dist/client` static files
-    - [ ] Add catch-all route to serve `index.html` for SPA routing
-    - [ ] Ensure this only activates in production (not dev) to avoid conflicts with Vite dev server
+- [x] Task: Implement Express static file serving in production [00b2c3c]
+    - [x] Add middleware to serve `dist/client` static files
+    - [x] Add catch-all route to serve `index.html` for SPA routing
+    - [x] Ensure this only activates in production (not dev) to avoid conflicts with Vite dev server
 - [ ] Task: Write unified build script
     - [ ] Script builds client first: `npm run build -w client`
     - [ ] Then compiles server: `npm run build -w server`
