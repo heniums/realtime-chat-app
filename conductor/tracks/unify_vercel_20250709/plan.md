@@ -29,10 +29,10 @@
 
 ## Phase 2: Build Integration & Static File Serving
 
-- [ ] Task: Configure client build output for server consumption
-    - [ ] Update client/vite.config.ts to set `build.outDir` to a predictable path (e.g., `../dist/client`)
-    - [ ] Verify build output includes `index.html` and static assets
-    - [ ] Ensure Socket.IO client connects to correct URL in production
+- [x] Task: Configure client build output for server consumption [524824c]
+    - [x] Update client/vite.config.ts to set `build.outDir` to a predictable path (e.g., `../dist/client`)
+    - [x] Verify build output includes `index.html` and static assets
+    - [x] Ensure Socket.IO client connects to correct URL in production
 - [ ] Task: Implement Express static file serving in production
     - [ ] Add middleware to serve `dist/client` static files
     - [ ] Add catch-all route to serve `index.html` for SPA routing
