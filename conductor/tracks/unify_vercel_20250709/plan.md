@@ -37,14 +37,14 @@
     - [x] Add middleware to serve `dist/client` static files
     - [x] Add catch-all route to serve `index.html` for SPA routing
     - [x] Ensure this only activates in production (not dev) to avoid conflicts with Vite dev server
-- [ ] Task: Write unified build script
-    - [ ] Script builds client first: `npm run build -w client`
-    - [ ] Then compiles server: `npm run build -w server`
-    - [ ] Verify dist/ directory contains both client and server outputs
-- [ ] Task: Verify production start command
-    - [ ] `npm start` runs compiled server from dist/
-    - [ ] Server correctly serves static files on the same port
-    - [ ] Socket.IO connections work via the unified port
+- [x] Task: Write unified build script [4893488]
+    - [x] Script builds client first: `npm run build -w client`
+    - [x] Then compiles server: `npm run build -w server`
+    - [x] Verify dist/ directory contains both client and server outputs
+- [x] Task: Verify production start command [4893488]
+    - [x] `npm start` runs compiled server from dist/
+    - [x] Server correctly serves static files on the same port
+    - [x] Socket.IO connections work via the unified port
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Build Integration & Static File Serving' (Protocol in workflow.md)
 
 ## Phase 3: Vercel Deployment Configuration
