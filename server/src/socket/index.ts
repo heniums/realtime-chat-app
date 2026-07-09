@@ -16,11 +16,16 @@ import {
 import { EVENTS, USER_STATUS } from "../types";
 
 export function initSocket(httpServer: HttpServer): Server {
+  const transports = (process.env.SOCKET_TRANSPORTS?.split(",") ?? [
+    "websocket",
+    "polling",
+  ]) as Array<"websocket" | "polling">;
   const io = new Server(httpServer, {
     cors: {
       origin: process.env.CLIENT_ORIGIN ?? "http://localhost:5173",
       methods: ["GET", "POST"],
     },
+    transports,
   });
 
   // Verify JWT on every connection (first-time users without tokens pass through).
