@@ -21,10 +21,10 @@
     - [x] Update client/package.json to remove hoisted deps
     - [x] Update server/package.json to remove hoisted deps
     - [x] Verify `npm install` works from root
-- [ ] Task: Configure root .gitignore and environment handling
-    - [ ] Ensure root .gitignore covers all build outputs
-    - [ ] Create root .env.example documenting required env vars
-    - [ ] Ensure client and server env var loading still works
+- [x] Task: Configure root .gitignore and environment handling [ca34582]
+    - [x] Ensure root .gitignore covers all build outputs
+    - [x] Create root .env.example documenting required env vars
+    - [x] Ensure client and server env var loading still works
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Root Project Structure & Dependency Consolidation' (Protocol in workflow.md)
 
 ## Phase 2: Build Integration & Static File Serving
