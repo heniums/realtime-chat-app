@@ -24,7 +24,7 @@ if (clientDistPath) {
   app.use(express.static(absoluteClientDist));
 
   // SPA catch-all: serve index.html for any non-API route
-  app.get("*", (_req, res) => {
+  app.use((_req, res) => {
     res.sendFile(path.join(absoluteClientDist, "index.html"));
   });
 }
