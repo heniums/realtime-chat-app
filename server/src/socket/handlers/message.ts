@@ -14,9 +14,9 @@ export function registerMessageHandlers(socket: Socket, io: Server): void {
   // ── message:send ───────────────────────────────────────────────────────────
   socket.on(
     EVENTS.MESSAGE_SEND,
-    ({ roomId, text }: { roomId: string; text: string }) => {
-      const user = getUser(socket.id);
-      const room = getRoom(roomId);
+    async ({ roomId, text }: { roomId: string; text: string }) => {
+      const user = await getUser(socket.id);
+      const room = await getRoom(roomId);
 
       if (!user) {
         socket.emit(EVENTS.MESSAGE_ERROR, { message: "Not authenticated" });
@@ -54,36 +54,36 @@ export function registerMessageHandlers(socket: Socket, io: Server): void {
         timestamp: new Date(),
       };
 
-      addMessage(message);
+      await addMessage(message);
       io.to(roomId).emit(EVENTS.MESSAGE_RECEIVED, message);
     },
   );
 
   // ── typing:start ───────────────────────────────────────────────────────────
-  socket.on(EVENTS.TYPING_START, ({ roomId }: { roomId: string }) => {
-    const user = getUser(socket.id);
+  socket.on(EVENTS.TYPING_START, async ({ roomId }: { roomId: string }) => {
+    const user = await getUser(socket.id);
     if (!user || !user.rooms.includes(roomId)) return;
 
-    setTyping(roomId, socket.id, true);
+    await setTyping(roomId, socket.id, true);
     socket
       .to(roomId)
       .emit(EVENTS.TYPING_UPDATE, {
         roomId,
-        users: getTypingUsernames(roomId),
+        users: await getTypingUsernames(roomId),
       });
   });
 
   // ── typing:stop ────────────────────────────────────────────────────────────
-  socket.on(EVENTS.TYPING_STOP, ({ roomId }: { roomId: string }) => {
-    const user = getUser(socket.id);
+  socket.on(EVENTS.TYPING_STOP, async ({ roomId }: { roomId: string }) => {
+    const user = await getUser(socket.id);
     if (!user) return;
 
-    setTyping(roomId, socket.id, false);
+    await setTyping(roomId, socket.id, false);
     socket
       .to(roomId)
       .emit(EVENTS.TYPING_UPDATE, {
         roomId,
-        users: getTypingUsernames(roomId),
+        users: await getTypingUsernames(roomId),
       });
   });
 }
