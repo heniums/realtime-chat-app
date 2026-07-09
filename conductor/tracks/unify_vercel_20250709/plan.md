@@ -1,6 +1,6 @@
 # Implementation Plan: Unify client and server for single-command Vercel deployment
 
-## Phase 1: Root Project Structure & Dependency Consolidation
+## Phase 1: Root Project Structure & Dependency Consolidation [checkpoint: a7b582a]
 
 - [x] Task: Analyze current root structure and identify all dependencies [61d6c80]
     - [x] List all client dependencies and devDependencies
