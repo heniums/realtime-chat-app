@@ -1,0 +1,21 @@
+{
+  "name": "realtime-chat-app",
+  "version": "0.4.5",
+  "private": true,
+  "description": "Unified realtime chat application with React client and Express/Socket.IO server",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w client && npm run build -w server",
+    "start": "npm start -w server",
+    "lint": "npm run lint -w client"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "typescript": "^6.0.2",
+    "@types/node": "^25.6.0"
+  }
+}
