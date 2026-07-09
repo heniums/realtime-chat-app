@@ -7,11 +7,11 @@
     - [x] List all server dependencies and devDependencies
     - [x] Identify overlapping dependencies (typescript, @types/node, etc.)
     - [x] Identify dependency conflicts (e.g., different TypeScript versions)
-- [ ] Task: Create root package.json with workspace structure
-    - [ ] Add root metadata (name, version, private, type)
-    - [ ] Add workspaces array: `["client", "server"]`
-    - [ ] Add `concurrently` to root devDependencies
-    - [ ] Add unified root scripts:
+- [x] Task: Create root package.json with workspace structure [b6b1441]
+    - [x] Add root metadata (name, version, private, type)
+    - [x] Add workspaces array: `["client", "server"]`
+    - [x] Add `concurrently` to root devDependencies
+    - [x] Add unified root scripts:
         - `dev`: `concurrently \"npm run dev -w server\" \"npm run dev -w client\"`
         - `build`: Build client then compile server
         - `start`: Start compiled server
