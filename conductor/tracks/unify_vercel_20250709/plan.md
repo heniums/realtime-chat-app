@@ -27,7 +27,7 @@
     - [x] Ensure client and server env var loading still works
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Root Project Structure & Dependency Consolidation' (Protocol in workflow.md)
 
-## Phase 2: Build Integration & Static File Serving
+## Phase 2: Build Integration & Static File Serving [checkpoint: 04bad1e]
 
 - [x] Task: Configure client build output for server consumption [524824c]
     - [x] Update client/vite.config.ts to set `build.outDir` to a predictable path (e.g., `../dist/client`)
