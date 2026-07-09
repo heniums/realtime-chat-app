@@ -65,7 +65,7 @@
     - [x] Documented limitation: real-time chat requires single-instance host (Railway, Render, Fly.io, VPS)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Vercel Deployment Configuration' (Protocol in workflow.md)
 
-## Phase 4: End-to-End Verification & Cleanup
+## Phase 4: End-to-End Verification & Cleanup [checkpoint: ed69894]
 
 - [x] Task: Run full unified build test
     - [x] Execute `npm run build` from root — PASS (client + server compile cleanly)
