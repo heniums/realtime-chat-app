@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Unify client and server for single-command Vercel deployment**
+- [~] **Track: Unify client and server for single-command Vercel deployment**
   *Link: [./tracks/unify_vercel_20250709/](./tracks/unify_vercel_20250709/)*
