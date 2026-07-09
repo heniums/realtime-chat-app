@@ -59,10 +59,13 @@
     - [x] List all env vars needed by server (e.g., JWT_SECRET, PORT)
     - [x] Create .env.example at root with all variables
     - [x] Update README with deployment instructions
-- [x] Task: Verify serverless compatibility and document limitations [5da7d8b]
-    - [x] Socket.IO polling transport tested locally — works correctly
-    - [x] Vercel serverless identified as incompatible (session state not shared across invocations)
-    - [x] Documented limitation: real-time chat requires single-instance host (Railway, Render, Fly.io, VPS)
+- [x] Task: Add Redis persistence for serverless state [c2620de]
+    - [x] Install ioredis and @socket.io/redis-adapter
+    - [x] Refactor store to use Redis when REDIS_URL is set, fallback to in-memory otherwise
+    - [x] Update all socket handlers and auth middleware to use async store operations
+    - [x] Add Redis adapter to Socket.IO for cross-instance pub/sub
+    - [x] Remove setTimeout-based grace periods (incompatible with serverless)
+    - [x] Full chat flow tested locally with in-memory fallback — works correctly
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Vercel Deployment Configuration' (Protocol in workflow.md)
 
 ## Phase 4: End-to-End Verification & Cleanup [checkpoint: ed69894]
