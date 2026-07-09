@@ -16,11 +16,11 @@
         - `build`: Build client then compile server
         - `start`: Start compiled server
         - `install:all`: Install all workspace dependencies
-- [ ] Task: Deduplicate and hoist shared dependencies
-    - [ ] Move shared dependencies (typescript, @types/node, dotenv) to root
-    - [ ] Update client/package.json to remove hoisted deps
-    - [ ] Update server/package.json to remove hoisted deps
-    - [ ] Verify `npm install` works from root
+- [x] Task: Deduplicate and hoist shared dependencies [4ca0a86]
+    - [x] Move shared dependencies (typescript, @types/node) to root
+    - [x] Update client/package.json to remove hoisted deps
+    - [x] Update server/package.json to remove hoisted deps
+    - [x] Verify `npm install` works from root
 - [ ] Task: Configure root .gitignore and environment handling
     - [ ] Ensure root .gitignore covers all build outputs
     - [ ] Create root .env.example documenting required env vars
