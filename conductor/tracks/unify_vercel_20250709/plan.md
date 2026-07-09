@@ -47,22 +47,22 @@
     - [x] Socket.IO connections work via the unified port
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Build Integration & Static File Serving' (Protocol in workflow.md)
 
-## Phase 3: Vercel Deployment Configuration
+## Phase 3: Vercel Deployment Configuration [checkpoint: e4ae24f]
 
-- [ ] Task: Create vercel.json configuration
-    - [ ] Define builds for both client and server
-    - [ ] Configure rewrites: API/socket routes → server, everything else → client
-    - [ ] Set output directory for static files
-    - [ ] Configure install/build/start commands
-- [ ] Task: Consolidate and document environment variables
-    - [ ] List all env vars needed by client (e.g., VITE_API_URL)
-    - [ ] List all env vars needed by server (e.g., JWT_SECRET, PORT)
-    - [ ] Create .env.example at root with all variables
-    - [ ] Update README with deployment instructions
-- [ ] Task: Verify serverless compatibility
-    - [ ] Ensure Socket.IO works with Vercel (may need @vercel/node adapter or stay on standard Node runtime)
-    - [ ] Check that express app initialization fits serverless constraints
-    - [ ] Document any Vercel-specific limitations (e.g., WebSocket support)
+- [x] Task: Create vercel.json configuration [5da7d8b]
+    - [x] Define builds for both client and server
+    - [x] Configure rewrites: API/socket routes → server, everything else → client
+    - [x] Set output directory for static files
+    - [x] Configure install/build/start commands
+- [x] Task: Consolidate and document environment variables [5da7d8b]
+    - [x] List all env vars needed by client (e.g., VITE_API_URL)
+    - [x] List all env vars needed by server (e.g., JWT_SECRET, PORT)
+    - [x] Create .env.example at root with all variables
+    - [x] Update README with deployment instructions
+- [x] Task: Verify serverless compatibility and document limitations [5da7d8b]
+    - [x] Socket.IO polling transport tested locally — works correctly
+    - [x] Vercel serverless identified as incompatible (session state not shared across invocations)
+    - [x] Documented limitation: real-time chat requires single-instance host (Railway, Render, Fly.io, VPS)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Vercel Deployment Configuration' (Protocol in workflow.md)
 
 ## Phase 4: End-to-End Verification & Cleanup
